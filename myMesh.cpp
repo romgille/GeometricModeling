@@ -439,7 +439,6 @@ bool myMesh::triangulate(myFace *f)
  
 	cout << "after" << f->size() << endl;
 
-
 	unsigned int n = f->size();
 
 	vector<myHalfedge *> IN (n-1);
@@ -608,9 +607,20 @@ void myMesh::sharpen(float delta)
 
 void myMesh::inflate(float delta)
 {
+	for (myVertex* v : vertices) {
+		v->point += v->normal * delta;
+	}
 }
 
 void myMesh::computeSilhouette(std::vector<myHalfedge *>& silhouette_edges, glm::vec3 camera_position)
 {
-	
+	for (myHalfedge *e : halfedges) {
+		glm::vec3 cameraVector = glm::vec3(camera_position - e->source->point);
+		glm::vec3 faceNormal = e->adjacent_face->normal;
+		glm::vec3 adjacentFaceNormal = e->twin->adjacent_face->normal;
+		if (glm::dot(cameraVector, faceNormal) <= 0 &&
+			glm::dot(cameraVector, adjacentFaceNormal) >= 0) {
+			silhouette_edges.push_back(e);
+		}
+	}
 }
