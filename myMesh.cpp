@@ -4,7 +4,7 @@
 #include <sstream>
 #include <map>
 #include <utility>
-#include <glm/gtc/type_ptr.hpp>    
+#include <glm/gtc/type_ptr.hpp>
 #include "helper_functions.h"
 #include <wx/math.h>
 #include <algorithm>
@@ -110,7 +110,7 @@ bool myMesh::_checkhalfedges_source()
 {
 	return _checkhalfedges_source(halfedges);
 }
-	
+
 bool myMesh::_checkhalfedges_source(vector<myHalfedge *> & HE) const
 {
 	bool error = true;
@@ -135,7 +135,7 @@ bool myMesh::_checkvertices_fans()
 bool myMesh::_checkvertices_fans(vector<myVertex *> & V) const
 {
 	bool error = true;
-	
+
 	map<myVertex *, size_t> vertex_outdegrees;
 
 	for (size_t i = 0;i < V.size();++i)
@@ -154,7 +154,7 @@ bool myMesh::_checkvertices_fans(vector<myVertex *> & V) const
 		myHalfedge *e = V[i]->originof;
 
 		size_t k = 0;
-		do 
+		do
 		{
 			myassert(e->prev != nullptr);
 			e = e->prev->twin;
@@ -188,7 +188,7 @@ bool myMesh::_checkfaces_boundaryedges(vector<myFace *> & F) const
 
 		myHalfedge *e = F[i]->adjacent_halfedge;
 		size_t k = 0;
-		do 
+		do
 		{
 			myassert(e != nullptr);
 			e = e->next;
@@ -203,7 +203,7 @@ bool myMesh::_checkfaces_boundaryedges(vector<myFace *> & F) const
 	cout << "\tAverage number of edges per face: " << static_cast<float>(num_incidentedgesoverallfaces) / faces.size() << endl;
 	if (istriangular) cout << "\t\tThe mesh is triangular.\n";
 	else cout << "\t\tThe mesh is not triangular.\n";
-	
+
 	cout << "\tEnded check.\n\n";
 
 	return error;
@@ -216,7 +216,7 @@ bool myMesh::readFile(std::string filename)
 	map<pair<int, int>, myHalfedge *> hemap;
 
 	ifstream fin(filename);
-	if (!fin.is_open()) 
+	if (!fin.is_open())
 	{
 		PRINT(ERROR_FILEOPEN);
 		return false;
@@ -315,7 +315,7 @@ bool myMesh::readFile(std::string filename)
 	//faces.push_back(f);
 
 	checkMesh();
-	
+
 	computeNormals();
 
 	normalize();
@@ -339,7 +339,7 @@ void myMesh::normalize()
 	enum { MIN, MAX };
 	vector<glm::vec3> corner = { vertices[0]->point, vertices[0]->point };
 
-	for (size_t i = 1; i < vertices.size(); i++) 
+	for (size_t i = 1; i < vertices.size(); i++)
 	{
 		for (int coordinate = 0;coordinate < 3; coordinate++)
 		{
@@ -347,10 +347,10 @@ void myMesh::normalize()
 			corner[MAX][coordinate] = std::max( corner[MAX][coordinate], vertices[i]->point[coordinate] );
 		}
 	}
-	
+
 	float scale_factor = std::max({ corner[MAX][0] - corner[MIN][0], corner[MAX][1] - corner[MIN][1], corner[MAX][2] - corner[MIN][2] } );
 
-	for (size_t i = 0; i < vertices.size(); i++) 
+	for (size_t i = 0; i < vertices.size(); i++)
 	{
 		for (int coordinate = 0;coordinate < 3; coordinate++)
 			vertices[i]->point[coordinate] -= (corner[MAX][coordinate] + corner[MIN][coordinate]) / 2.0f;
@@ -367,7 +367,7 @@ bool myMesh::writeFile(std::string filename)
 vector<glm::vec3> myMesh::voronoiReconstruction( )
 {
 	return vector<glm::vec3>();
-} 
+}
 
 void myMesh::splitFaceTRIS(myFace *f, glm::vec3 p)
 {
@@ -413,11 +413,11 @@ void myMesh::subdivisionCatmullClark()
 
 void myMesh::setIndices()
 {
-	for (size_t i = 0; i < faces.size(); i++) 
+	for (size_t i = 0; i < faces.size(); i++)
 		faces[i]->index = i;
-	for (size_t i = 0; i < halfedges.size(); i++) 
+	for (size_t i = 0; i < halfedges.size(); i++)
 		halfedges[i]->index = i;
-	for (size_t i = 0; i < vertices.size(); i++)	
+	for (size_t i = 0; i < vertices.size(); i++)
 		vertices[i]->index = i;
 }
 
@@ -436,7 +436,7 @@ bool myMesh::triangulate(myFace *f)
 	cout << "before " << f->size() << endl;
 
 	if (f->size() <= 3) return false;
- 
+
 	cout << "after" << f->size() << endl;
 
 	unsigned int n = f->size();
@@ -448,15 +448,15 @@ bool myMesh::triangulate(myFace *f)
 	vector<myVertex *> V;
 
 	for (int i = 1;i < n - 2; i++) {
-		F[i] = new myFace(); 
+		F[i] = new myFace();
 		faces.push_back(F[i]);
 	}
 	for (int i = 1;i < n - 2; i++) {
-		IN[i] = new myHalfedge(); 
+		IN[i] = new myHalfedge();
 		halfedges.push_back(IN[i]);
 	}
 	for (int i = 1;i < n - 2; i++) {
-		OUT[i] = new myHalfedge(); 
+		OUT[i] = new myHalfedge();
 		halfedges.push_back(OUT[i]);
 	}
 
@@ -493,9 +493,9 @@ bool myMesh::triangulate(myFace *f)
 	}
 	OUT[n - 3]->prev = H[n - 1];
 
-	for (int i = 0; i < n - 2; ++i)  
+	for (int i = 0; i < n - 2; ++i)
 		F[i]->adjacent_halfedge = IN[i+1];
-	 
+
 
 	for (int i = 1;i < n-1;i++)
 	{
@@ -514,7 +514,7 @@ bool myMesh::triangulate(myFace *f)
 	H[n - 1]->adjacent_face = F[n - 3];
 	H[n - 1]->next = OUT[n - 3];
 	H[n - 1]->prev = H[n - 2];
-		
+
 	return true;
 }
 
@@ -552,7 +552,7 @@ void myMesh::copy(myMesh *m)
 		halfedges[i]->adjacent_face = faces[m->halfedges[i]->adjacent_face->index];
 		halfedges[i]->next = halfedges[m->halfedges[i]->next->index];
 		halfedges[i]->prev = halfedges[m->halfedges[i]->prev->index];
-		if ( m->halfedges[i]->twin != nullptr && m->halfedges[i]->twin->index < m->halfedges.size() ) 
+		if ( m->halfedges[i]->twin != nullptr && m->halfedges[i]->twin->index < m->halfedges.size() )
 			halfedges[i]->twin = halfedges[m->halfedges[i]->twin->index];
 	}
 
@@ -599,6 +599,28 @@ bool myMesh::intersect(mySegment ray, myFace * & picked_face, float & min_t, std
 
 void myMesh::smoothen(float delta)
 {
+	std::vector<glm::vec3> V (vertices.size());
+
+	for (int i = 0; i < vertices.size(); ++i) {
+		myHalfedge* halfedge = vertices[i]->originof;
+		glm::vec3 sum = glm::vec3(0.0f, 0.0f, 0.0f);
+		float j = 0.0f;
+
+		do {
+			sum += halfedge->next->source->point;
+			halfedge = halfedge->twin->next;
+			j += 1;
+		} while (vertices[i]->originof != halfedge);
+
+		sum /= j;
+
+		V[i] = vertices[i]->point * (1 - delta) + sum * delta;
+	}
+
+	for (int i = 0; i < vertices.size(); i++) {
+		vertices[i]->point = V[i];
+	}
+	
 }
 
 void myMesh::sharpen(float delta)
