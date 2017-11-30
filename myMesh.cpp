@@ -380,7 +380,67 @@ bool myMesh::splitEdge(myHalfedge *e1, glm::vec3 p)
 {
 	myassert(e1 != nullptr);
 
-	return false;
+	myHalfedge* h0 = e1;
+	myHalfedge* h1 = e1->twin;
+	myHalfedge* h2 = new myHalfedge();
+	myHalfedge* h3 = new myHalfedge();
+	myHalfedge* h4 = e1->prev;
+	myHalfedge* h5 = e1->twin->next;
+	myHalfedge* h6 = e1->next;
+	myHalfedge* h7 = e1->twin->prev;
+	myVertex* newVertex = new myVertex(p);
+	myVertex* v0 = e1->source;
+	myVertex* v1 = e1->twin->source;
+	myFace *f0 = e1->adjacent_face;
+	myFace *f1 = e1->twin->adjacent_face;
+
+	vertices.push_back(newVertex);
+	halfedges.push_back(h2);
+	halfedges.push_back(h3);
+
+	h0->source = v0;
+	h0->next = h2;
+	h0->prev = h4;
+	h0->twin = h1;
+	h0->adjacent_face = f0;
+
+	h1->source = newVertex;
+	h1->next = h5;
+	h1->prev = h3;
+	h1->twin = h0;
+	h1->adjacent_face = f1;
+
+	h2->source = newVertex;
+	h2->next = h6;
+	h2->twin = h3; 
+	h2->prev = h0;
+	h2->adjacent_face = f0;
+
+	h3->source = v1;
+	h3->next = h1;
+	h3->prev = h7;
+	h3->twin = h2;
+	h3->adjacent_face = f1;
+
+	h4->next = h0;
+
+	h5->prev = h1;
+
+	h6->prev = h2;
+
+	h7->next = h3;
+
+	newVertex->originof = h2;
+
+	v0->originof = h0;
+
+	v1->originof = h3;
+
+	f0->adjacent_halfedge = h0;
+
+	f1->adjacent_halfedge = h1;
+
+	return true;
 }
 
 void myMesh::splitFaceQUADS(myFace *f, glm::vec3 p)
