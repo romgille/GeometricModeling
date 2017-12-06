@@ -372,7 +372,9 @@ vector<glm::vec3> myMesh::voronoiReconstruction( )
 void myMesh::splitFaceTRIS(myFace *f, glm::vec3 p)
 {
 	myassert(f != nullptr);
-
+	
+	splitFaceQUADS(f, p);
+	/*
 	size_t n = f->size();
 
 	setIndices();
@@ -429,15 +431,17 @@ void myMesh::splitFaceTRIS(myFace *f, glm::vec3 p)
 		F[i]->adjacent_halfedge = S[i];
 
 		halfedges.push_back(S[i]);
+		
 		halfedges.push_back(E[i]);
 	}
+	*/
 }
 
 
 bool myMesh::splitEdge(myHalfedge *e1, glm::vec3 p)
 {
 	myassert(e1 != nullptr);
-
+	
 	myHalfedge* h0 = e1;
 	myHalfedge* h1 = e1->twin;
 	myHalfedge* h2 = new myHalfedge();
@@ -504,6 +508,64 @@ bool myMesh::splitEdge(myHalfedge *e1, glm::vec3 p)
 void myMesh::splitFaceQUADS(myFace *f, glm::vec3 p)
 {
 	myassert(f != nullptr);
+
+	int n = f->size();
+
+	if (n % 2 != 0 || n < 6) return;
+
+	std::vector<myHalfedge *> T;
+	std::vector<myHalfedge *> R;
+	std::vector<myHalfedge *> S;
+	std::vector<myHalfedge *> E;
+	std::vector<myFace *> F;
+
+	myHalfedge *halfedge = f->adjacent_halfedge;
+
+	n = n / 2;
+
+	for (int i = 0; i < n; ++i) {
+		T.push_back(halfedge);
+		R.push_back(halfedge->next);
+		S.push_back(new myHalfedge());
+		E.push_back(new myHalfedge());
+		F.push_back(new myFace());
+		halfedge = halfedge->next->next;
+	}
+	delete F[0];
+	F[0] = f;
+
+	myVertex *vertex = new myVertex(p);
+	vertex->originof = S[0];
+	vertices.push_back(vertex);
+
+	for (int i = 0; i < n; ++i) {
+		size_t ipo = (i + 1) % (n);
+		size_t imo = (i - 1 + n) % (n);
+
+		T[i]->prev = S[i];
+		T[i]->adjacent_face = F[i];
+
+		S[i]->next = T[i];
+		S[i]->prev = E[ipo];
+		S[i]->source = vertex;
+		S[i]->adjacent_face = F[i];
+		S[i]->twin = E[i];
+
+		E[i]->next = S[imo];
+		E[i]->prev = R[imo];
+		E[i]->source = T[i]->source;
+		E[i]->adjacent_face = F[imo];
+		E[i]->twin = S[i];
+
+		R[i]->next = E[ipo];
+		R[i]->adjacent_face = F[i];
+
+		F[i]->adjacent_halfedge = S[i];
+
+		halfedges.push_back(S[i]);
+		halfedges.push_back(E[i]);
+		faces.push_back(F[i]);
+	}
 }
 
 void myMesh::splitFace_size6(myFace *f, myHalfedge *starting_edge)
