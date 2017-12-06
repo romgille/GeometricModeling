@@ -373,6 +373,64 @@ void myMesh::splitFaceTRIS(myFace *f, glm::vec3 p)
 {
 	myassert(f != nullptr);
 
+	size_t n = f->size();
+
+	setIndices();
+
+	std::vector<myHalfedge *> T;
+	std::vector<myHalfedge *> S;
+	std::vector<myHalfedge *> E;
+	std::vector<myFace *> F;
+
+	myHalfedge *e = f->adjacent_halfedge;
+
+	for (int i = 0; i < n; i++) {
+		T.push_back(e);
+		S.push_back(new myHalfedge());
+		E.push_back(new myHalfedge());
+		F.push_back(new myFace());
+		e = e->next;
+	}
+
+	myVertex *vp = new myVertex();
+	vp->point = p;
+	vp->originof = S[0];
+
+	vertices.push_back(vp);
+
+	for (int i = 0; i < n; i++) {
+		if (i == 0) {
+			F[i]->index = f->index;
+			faces[f->index] = F[i];
+		}
+		else {
+			F[i]->index = faces.size();
+			faces.push_back(F[i]);
+		}
+		size_t ipo = (i + 1) % n;
+		size_t imo = (i - 1 + n) % n;
+
+		T[i]->next = E[ipo];
+		T[i]->prev = S[i];
+		T[i]->adjacent_face = F[i];
+
+		S[i]->next = T[i];
+		S[i]->prev = E[ipo];
+		S[i]->source = vp;
+		S[i]->adjacent_face = F[i];
+		S[i]->twin = E[i];
+
+		E[i]->next = S[imo];
+		E[i]->prev = T[imo];
+		E[i]->source = T[i]->source;
+		E[i]->adjacent_face = F[imo];
+		E[i]->twin = S[i];
+
+		F[i]->adjacent_halfedge = S[i];
+
+		halfedges.push_back(S[i]);
+		halfedges.push_back(E[i]);
+	}
 }
 
 
