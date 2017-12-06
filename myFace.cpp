@@ -68,8 +68,18 @@ void myFace::copy(myFace *f)
 glm::vec3 myFace::centroid() const
 {
 	myassert(adjacent_halfedge != nullptr);
- 
-	return glm::vec3(0.0f, 0.0f, 0.0f);
+
+	myHalfedge* tmp = this->adjacent_halfedge;
+	float nbVertex = 0;
+	glm::vec3 centroid = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	do {
+		centroid += tmp->source->point;
+		tmp = tmp->next;
+		++nbVertex;
+	} while (tmp != this->adjacent_halfedge);
+
+	return centroid / nbVertex;
 }
 
 bool myFace::intersect(mySegment ray, float & min_t, glm::mat4 model_matrix) const
@@ -114,7 +124,7 @@ void myFace::closestVertexEdge(glm::vec3 p, myVertex * & picked_vertex, myHalfed
 {
 	picked_vertex = nullptr;
 	picked_halfedge = nullptr;
-	
+
 	float min_v = std::numeric_limits<float>::max();
 	float min_e = std::numeric_limits<float>::max();
 
@@ -139,4 +149,3 @@ void myFace::closestVertexEdge(glm::vec3 p, myVertex * & picked_vertex, myHalfed
 		e = e->next;
 	} while (e != adjacent_halfedge);
 }
- 

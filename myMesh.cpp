@@ -4,7 +4,7 @@
 #include <sstream>
 #include <map>
 #include <utility>
-#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/type_ptr.hpp>    
 #include "helper_functions.h"
 #include <wx/math.h>
 #include <algorithm>
@@ -110,7 +110,7 @@ bool myMesh::_checkhalfedges_source()
 {
 	return _checkhalfedges_source(halfedges);
 }
-
+	
 bool myMesh::_checkhalfedges_source(vector<myHalfedge *> & HE) const
 {
 	bool error = true;
@@ -135,7 +135,7 @@ bool myMesh::_checkvertices_fans()
 bool myMesh::_checkvertices_fans(vector<myVertex *> & V) const
 {
 	bool error = true;
-
+	
 	map<myVertex *, size_t> vertex_outdegrees;
 
 	for (size_t i = 0;i < V.size();++i)
@@ -154,7 +154,7 @@ bool myMesh::_checkvertices_fans(vector<myVertex *> & V) const
 		myHalfedge *e = V[i]->originof;
 
 		size_t k = 0;
-		do
+		do 
 		{
 			myassert(e->prev != nullptr);
 			e = e->prev->twin;
@@ -188,7 +188,7 @@ bool myMesh::_checkfaces_boundaryedges(vector<myFace *> & F) const
 
 		myHalfedge *e = F[i]->adjacent_halfedge;
 		size_t k = 0;
-		do
+		do 
 		{
 			myassert(e != nullptr);
 			e = e->next;
@@ -203,7 +203,7 @@ bool myMesh::_checkfaces_boundaryedges(vector<myFace *> & F) const
 	cout << "\tAverage number of edges per face: " << static_cast<float>(num_incidentedgesoverallfaces) / faces.size() << endl;
 	if (istriangular) cout << "\t\tThe mesh is triangular.\n";
 	else cout << "\t\tThe mesh is not triangular.\n";
-
+	
 	cout << "\tEnded check.\n\n";
 
 	return error;
@@ -245,74 +245,45 @@ bool myMesh::readFile(std::string filename)
 		else if (t == "f")
 		{
 			vector<size_t> faceids;
-			vector<myHalfedge *> H;
+			vector<myHalfedge *> halfedge;
 
 			while (myline >> u) {
 				faceids.push_back(atoi((u.substr(0, u.find("/"))).c_str()) - 1);
-				H.push_back(new myHalfedge());
+				halfedge.push_back(new myHalfedge());
 			}
 
 			myFace *face = new myFace();
 
-			int halfedgesSize = H.size();
+			int halfedgesSize = halfedge.size();
 			for (size_t i = 0; i < halfedgesSize; ++i)
 			{
 				int ipo = (i + 1) % halfedgesSize;
 				int imo = (i - 1 + halfedgesSize) % halfedgesSize;
-				H[i]->adjacent_face = face;
-				H[i]->next = H[ipo];
-				H[i]->prev = H[imo];
-				H[i]->twin = nullptr;
-				H[i]->source = vertices[faceids[i]];
+				halfedge[i]->adjacent_face = face;
+				halfedge[i]->next = halfedge[ipo];
+				halfedge[i]->prev = halfedge[imo];
+				halfedge[i]->twin = nullptr;
+				halfedge[i]->source = vertices[faceids[i]];
 
 				pair<int, int> a = make_pair(faceids[ipo], faceids[i]);
 				if (hemap.find(a) == hemap.end()) {
-					hemap[make_pair(faceids[i], faceids[ipo])] = H[i];
+					hemap[make_pair(faceids[i], faceids[ipo])] = halfedge[i];
 				}
 				else {
-					H[i]->twin = hemap[a];
-					hemap[a]->twin = H[i];
+					halfedge[i]->twin = hemap[a];
+					hemap[a]->twin = halfedge[i];
 				}
 
-				halfedges.push_back(H[i]);
-				vertices[faceids[i]]->originof = H[i];
+				halfedges.push_back(halfedge[i]);
+				vertices[faceids[i]]->originof = halfedge[i];
 			}
 
-			face->adjacent_halfedge = H[0];
+			face->adjacent_halfedge = halfedge[0];
 			face->normal = glm::vec3(1.0f, 1.0f, 1.0f);
 			faces.push_back(face);
 		}
 	}
 	fin.close();
-
-	//vector<myVertex *> verts(3);
-	//vector<myHalfedge *> hes(3);
-	//myFace *f = new myFace();
-	//
-	//verts[0] = new myVertex(glm::vec3(1.0f, 0.0f, 0.0f));
-	//verts[1] = new myVertex(glm::vec3(0.0f, 1.0f, 0.0f));
-	//verts[2] = new myVertex(glm::vec3(0.0f, 0.0f, 1.0f));
-	//for (int i = 0;i < 3;i++) hes[i] = new myHalfedge();
-	//
-	//for (int i=0;i<3;i++)
-	//{
-	//	int ipo = (i + 1) % 3;
-	//	int imo = (i - 1 + 3) % 3;
-	//	hes[i]->next = hes[ipo];
-	//	hes[i]->prev = hes[imo];
-	//	hes[i]->twin = nullptr;
-	//	hes[i]->adjacent_face = f;
-	//	hes[i]->source = verts[i];
-	//
-	//	verts[i]->originof = hes[i];
-	//	verts[i]->normal = glm::vec3(1.0f, 1.0f, 1.0f);
-	//
-	//	vertices.push_back(verts[i]);
-	//	halfedges.push_back(hes[i]);
-	//}
-	//f->adjacent_halfedge = hes[0];
-	//f->normal = glm::vec3(1.0f, 1.0f, 1.0f);
-	//faces.push_back(f);
 
 	checkMesh();
 
@@ -339,7 +310,7 @@ void myMesh::normalize()
 	enum { MIN, MAX };
 	vector<glm::vec3> corner = { vertices[0]->point, vertices[0]->point };
 
-	for (size_t i = 1; i < vertices.size(); i++)
+	for (size_t i = 1; i < vertices.size(); i++) 
 	{
 		for (int coordinate = 0;coordinate < 3; coordinate++)
 		{
@@ -347,10 +318,10 @@ void myMesh::normalize()
 			corner[MAX][coordinate] = std::max( corner[MAX][coordinate], vertices[i]->point[coordinate] );
 		}
 	}
-
+	
 	float scale_factor = std::max({ corner[MAX][0] - corner[MIN][0], corner[MAX][1] - corner[MIN][1], corner[MAX][2] - corner[MIN][2] } );
 
-	for (size_t i = 0; i < vertices.size(); i++)
+	for (size_t i = 0; i < vertices.size(); i++) 
 	{
 		for (int coordinate = 0;coordinate < 3; coordinate++)
 			vertices[i]->point[coordinate] -= (corner[MAX][coordinate] + corner[MIN][coordinate]) / 2.0f;
@@ -367,14 +338,12 @@ bool myMesh::writeFile(std::string filename)
 vector<glm::vec3> myMesh::voronoiReconstruction( )
 {
 	return vector<glm::vec3>();
-}
+} 
 
 void myMesh::splitFaceTRIS(myFace *f, glm::vec3 p)
 {
 	myassert(f != nullptr);
-	
-	splitFaceQUADS(f, p);
-	/*
+
 	size_t n = f->size();
 
 	setIndices();
@@ -384,28 +353,27 @@ void myMesh::splitFaceTRIS(myFace *f, glm::vec3 p)
 	std::vector<myHalfedge *> E;
 	std::vector<myFace *> F;
 
-	myHalfedge *e = f->adjacent_halfedge;
+	myHalfedge *halfedge = f->adjacent_halfedge;
 
-	for (int i = 0; i < n; i++) {
-		T.push_back(e);
+	for (size_t i = 0; i < n; i++) {
+		T.push_back(halfedge);
 		S.push_back(new myHalfedge());
 		E.push_back(new myHalfedge());
 		F.push_back(new myFace());
-		e = e->next;
+		halfedge = halfedge->next;
 	}
 
-	myVertex *vp = new myVertex();
-	vp->point = p;
-	vp->originof = S[0];
+	myVertex *vertex = new myVertex();
+	vertex->point = p;
+	vertex->originof = S[0];
 
-	vertices.push_back(vp);
+	vertices.push_back(vertex);
 
-	for (int i = 0; i < n; i++) {
+	for (size_t i = 0; i < n; i++) {
 		if (i == 0) {
 			F[i]->index = f->index;
 			faces[f->index] = F[i];
-		}
-		else {
+		} else {
 			F[i]->index = faces.size();
 			faces.push_back(F[i]);
 		}
@@ -418,7 +386,7 @@ void myMesh::splitFaceTRIS(myFace *f, glm::vec3 p)
 
 		S[i]->next = T[i];
 		S[i]->prev = E[ipo];
-		S[i]->source = vp;
+		S[i]->source = vertex;
 		S[i]->adjacent_face = F[i];
 		S[i]->twin = E[i];
 
@@ -431,76 +399,50 @@ void myMesh::splitFaceTRIS(myFace *f, glm::vec3 p)
 		F[i]->adjacent_halfedge = S[i];
 
 		halfedges.push_back(S[i]);
-		
 		halfedges.push_back(E[i]);
 	}
-	*/
 }
 
 
 bool myMesh::splitEdge(myHalfedge *e1, glm::vec3 p)
 {
 	myassert(e1 != nullptr);
-	
-	myHalfedge* h0 = e1;
-	myHalfedge* h1 = e1->twin;
-	myHalfedge* h2 = new myHalfedge();
-	myHalfedge* h3 = new myHalfedge();
-	myHalfedge* h4 = e1->prev;
-	myHalfedge* h5 = e1->twin->next;
-	myHalfedge* h6 = e1->next;
-	myHalfedge* h7 = e1->twin->prev;
-	myVertex* newVertex = new myVertex(p);
-	myVertex* v0 = e1->source;
-	myVertex* v1 = e1->twin->source;
-	myFace *f0 = e1->adjacent_face;
-	myFace *f1 = e1->twin->adjacent_face;
 
+	myVertex *newVertex = new myVertex();
+	newVertex->point = p;
+
+	// Update new halfedge
+	myHalfedge *newHalfedge = new myHalfedge();
+	newHalfedge->source = newVertex;
+	newHalfedge->adjacent_face = e1->adjacent_face;
+	newHalfedge->next = e1->next;
+	newHalfedge->prev = e1;
+	newHalfedge->twin = e1->twin;
+	e1->next->prev = newHalfedge;
+
+	e1->adjacent_face->adjacent_halfedge = newHalfedge;
+
+	// Update new halfedge twin
+	myHalfedge *newTwin = new myHalfedge();
+	newTwin->source = newVertex;
+	newTwin->adjacent_face = e1->twin->adjacent_face;
+	newTwin->next = e1->twin->next;
+	newTwin->prev = e1->twin;
+	newTwin->twin = e1;
+	e1->twin->next->prev = newTwin;
+
+	// Update e1 and twin
+	e1->next = newHalfedge;
+	e1->twin->twin = newHalfedge;
+	e1->twin->next = newTwin;
+	e1->twin = newTwin;
+
+	newVertex->originof = newHalfedge;
+
+	// Update arrays
 	vertices.push_back(newVertex);
-	halfedges.push_back(h2);
-	halfedges.push_back(h3);
-
-	h0->source = v0;
-	h0->next = h2;
-	h0->prev = h4;
-	h0->twin = h1;
-	h0->adjacent_face = f0;
-
-	h1->source = newVertex;
-	h1->next = h5;
-	h1->prev = h3;
-	h1->twin = h0;
-	h1->adjacent_face = f1;
-
-	h2->source = newVertex;
-	h2->next = h6;
-	h2->twin = h3; 
-	h2->prev = h0;
-	h2->adjacent_face = f0;
-
-	h3->source = v1;
-	h3->next = h1;
-	h3->prev = h7;
-	h3->twin = h2;
-	h3->adjacent_face = f1;
-
-	h4->next = h0;
-
-	h5->prev = h1;
-
-	h6->prev = h2;
-
-	h7->next = h3;
-
-	newVertex->originof = h2;
-
-	v0->originof = h0;
-
-	v1->originof = h3;
-
-	f0->adjacent_halfedge = h0;
-
-	f1->adjacent_halfedge = h1;
+	halfedges.push_back(newHalfedge);
+	halfedges.push_back(newTwin);
 
 	return true;
 }
@@ -509,7 +451,7 @@ void myMesh::splitFaceQUADS(myFace *f, glm::vec3 p)
 {
 	myassert(f != nullptr);
 
-	int n = f->size();
+	int n =   f->size();
 
 	if (n % 2 != 0 || n < 6) return;
 
@@ -540,7 +482,7 @@ void myMesh::splitFaceQUADS(myFace *f, glm::vec3 p)
 
 	for (int i = 0; i < n; ++i) {
 		size_t ipo = (i + 1) % (n);
-		size_t imo = (i - 1 + n) % (n);
+		size_t imo = (i - 1 + n ) % (n);
 
 		T[i]->prev = S[i];
 		T[i]->adjacent_face = F[i];
@@ -564,14 +506,15 @@ void myMesh::splitFaceQUADS(myFace *f, glm::vec3 p)
 
 		halfedges.push_back(S[i]);
 		halfedges.push_back(E[i]);
-		faces.push_back(F[i]);
+
+		if (i != 0)
+			faces.push_back(F[i]);
 	}
 }
 
 void myMesh::splitFace_size6(myFace *f, myHalfedge *starting_edge)
 {
 	if (f->size() != 6) return;
-
 }
 
 
@@ -585,20 +528,54 @@ void myMesh::subdivisionCatmullClark_createNewPoints(std::vector<glm::vec3> & fa
 													 std::vector<glm::vec3> & edgepoints,
 													 std::vector<glm::vec3> & newvertexpoints)
 {
+	for (myFace* face : faces) {
+		facepoints.push_back(face->centroid());
+	}
+	for (myVertex* vertex : vertices) {
+		newvertexpoints.push_back(vertex->vertexPoint());
+	}
+	for (myHalfedge* halfedge : halfedges) {
+		edgepoints.push_back(halfedge->edgeVertex());
+	}
 }
 
 void myMesh::subdivisionCatmullClark()
 {
+	std::vector<glm::vec3> facepoints;
+	std::vector<glm::vec3> edgepoints;
+	std::vector<glm::vec3> newvertexpoints;
+
+	setIndices();
+
+	subdivisionCatmullClark_createNewPoints(facepoints, edgepoints, newvertexpoints);
+
+	// remplacer points des vertex par newvertexpoints
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		vertices[i]->point = newvertexpoints[i];
+	}
+	// ne pas faire sur les twins
+	// splitedge de halfedge par edgepoints
+	for (size_t i = 0; i < edgepoints.size(); ++i) {
+		// ne pas traiter twin
+		if (halfedges[i]->index < halfedges[i]->twin->index) {
+			splitEdge(halfedges[i], edgepoints[i]);
+ 		}
+	}
+
+	// faces utiliser quad avec facepoints
+	for (size_t i = 0; i < facepoints.size(); ++i) {
+		splitFaceQUADS(faces[i], facepoints[i]);
+	}
 }
 
 void myMesh::setIndices()
 {
-	for (size_t i = 0; i < faces.size(); i++)
+	for (size_t i = 0; i < faces.size(); i++) 
 		faces[i]->index = i;
-	for (size_t i = 0; i < halfedges.size(); i++)
+	for (size_t i = 0; i < halfedges.size(); i++) 
 		halfedges[i]->index = i;
-	for (size_t i = 0; i < vertices.size(); i++)
-		vertices[i]->index = i;
+	for (size_t i = 0; i < vertices.size(); i++)	
+		vertices[i]->index = i; 
 }
 
 void myMesh::triangulate()
@@ -613,29 +590,25 @@ bool myMesh::triangulate(myFace *f)
 {
 	myassert(f != nullptr);
 
-	cout << "before " << f->size() << endl;
-
 	if (f->size() <= 3) return false;
 
-	cout << "after" << f->size() << endl;
+	size_t n = f->size();
 
-	unsigned int n = f->size();
-
-	vector<myHalfedge *> IN (n-1);
+	vector<myHalfedge *> IN(n - 1);
 	vector<myHalfedge *> OUT(n - 2);
 	vector<myFace *> F(n - 2);
 	vector<myHalfedge *> H;
 	vector<myVertex *> V;
 
-	for (int i = 1;i < n - 2; i++) {
+	for (size_t i = 1; i < n - 2; i++) {
 		F[i] = new myFace();
 		faces.push_back(F[i]);
 	}
-	for (int i = 1;i < n - 2; i++) {
+	for (size_t i = 1;i < n - 2; i++) {
 		IN[i] = new myHalfedge();
 		halfedges.push_back(IN[i]);
 	}
-	for (int i = 1;i < n - 2; i++) {
+	for (size_t i = 1;i < n - 2; i++) {
 		OUT[i] = new myHalfedge();
 		halfedges.push_back(OUT[i]);
 	}
@@ -651,13 +624,13 @@ bool myMesh::triangulate(myFace *f)
 
 	//IN[0] will not be used.
 	OUT[0] = H[0];
-	IN[n-2] = H[n-2];
+	IN[n - 2] = H[n - 2];
 	F[0] = f;
 
 	//from now onwards, not use the variable f.
-	for (int i = 1; i < n - 2; ++i) {
-		int ipo = (i + 1) ;
-		int imo = (i - 1 );
+	for (size_t i = 1; i < n - 2; ++i) {
+		int ipo = (i + 1);
+		int imo = (i - 1);
 
 		IN[i]->source = V[ipo];
 		IN[i]->adjacent_face = F[imo];
@@ -673,11 +646,11 @@ bool myMesh::triangulate(myFace *f)
 	}
 	OUT[n - 3]->prev = H[n - 1];
 
-	for (int i = 0; i < n - 2; ++i)
-		F[i]->adjacent_halfedge = IN[i+1];
+	for (size_t i = 0; i < n - 2; ++i)
+		F[i]->adjacent_halfedge = IN[i + 1];
 
 
-	for (int i = 1;i < n-1;i++)
+	for (size_t i = 1;i < n - 1;i++)
 	{
 		H[i]->next = IN[i];
 		H[i]->prev = OUT[i - 1];
@@ -697,7 +670,6 @@ bool myMesh::triangulate(myFace *f)
 
 	return true;
 }
-
 
 void myMesh::copy(myMesh *m)
 {
@@ -732,7 +704,7 @@ void myMesh::copy(myMesh *m)
 		halfedges[i]->adjacent_face = faces[m->halfedges[i]->adjacent_face->index];
 		halfedges[i]->next = halfedges[m->halfedges[i]->next->index];
 		halfedges[i]->prev = halfedges[m->halfedges[i]->prev->index];
-		if ( m->halfedges[i]->twin != nullptr && m->halfedges[i]->twin->index < m->halfedges.size() )
+		if ( m->halfedges[i]->twin != nullptr && m->halfedges[i]->twin->index < m->halfedges.size() ) 
 			halfedges[i]->twin = halfedges[m->halfedges[i]->twin->index];
 	}
 
@@ -762,7 +734,7 @@ bool myMesh::intersect(mySegment ray, myFace * & picked_face, float & min_t, std
 	min_t = std::numeric_limits<float>::max();
 	float tmp;
 
-	for (size_t i = 0;i < faces.size();i++)
+	for (size_t i = 0; i < faces.size(); i++)
 	{
 		myassert(faces[i] != nullptr);
 		if (faces[i]->intersect(ray, tmp, model_matrix) && tmp < min_t)
@@ -779,28 +751,23 @@ bool myMesh::intersect(mySegment ray, myFace * & picked_face, float & min_t, std
 
 void myMesh::smoothen(float delta)
 {
-	std::vector<glm::vec3> V (vertices.size());
+	std::vector<glm::vec3> verticesBis (vertices.size());
 
-	for (int i = 0; i < vertices.size(); ++i) {
-		myHalfedge* halfedge = vertices[i]->originof;
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		myHalfedge* tmp = vertices[i]->originof;
 		glm::vec3 sum = glm::vec3(0.0f, 0.0f, 0.0f);
-		float j = 0.0f;
-
+		float total = 0;
 		do {
-			sum += halfedge->next->source->point;
-			halfedge = halfedge->twin->next;
-			j += 1;
-		} while (vertices[i]->originof != halfedge);
-
-		sum /= j;
-
-		V[i] = vertices[i]->point * (1 - delta) + sum * delta;
+			sum += tmp->twin->source->point;
+			tmp = tmp->twin->next;
+			total += 1;
+		} while (tmp != vertices[i]->originof);
+		sum = sum / total;
+		verticesBis[i]  =  vertices[i]->point *  (1 - delta) + sum * delta;
 	}
 
-	for (int i = 0; i < vertices.size(); i++) {
-		vertices[i]->point = V[i];
-	}
-	
+	for (int i = 0;i < vertices.size();i++)
+		vertices[i]->point = verticesBis[i];
 }
 
 void myMesh::sharpen(float delta)

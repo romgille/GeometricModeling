@@ -15,10 +15,12 @@ public:
 
 	void computeNormal();
 
+	glm::vec3 vertexPoint();
+
 	void copy(myVertex *);
 	void reset();
 
 	myVertex(myVertex *);
-	myVertex(glm::vec3 p = glm::vec3(0.0f, 0.0f, 0.0f)); 
+	myVertex(glm::vec3 p = glm::vec3(0.0f, 0.0f, 0.0f));
 	~myVertex();
 };
